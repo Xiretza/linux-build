@@ -30,7 +30,7 @@ mkdir -p "$TEMP_ROOT"
 echo "Mounting rootfs"
 mount "${LOOP_DEVICE}p2" "$TEMP_ROOT"
 mkdir -p "${TEMP_ROOT}/boot"
-mount "${LOOP_DEVICE}p1" "${TEMP_ROOT}/boot"
+mount -o iocharset=iso8859-1 "${LOOP_DEVICE}p1" "${TEMP_ROOT}/boot"
 
 echo "Unpacking rootfs archive"
 bsdtar -xpf "$TARBALL" -C "$TEMP_ROOT" || true
