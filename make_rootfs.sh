@@ -81,10 +81,10 @@ fi
 DEST=$(readlink -f "$DEST")
 
 if [ ! -d "$DEST" ]; then
-	mkdir -p $DEST
+	mkdir -p "$DEST"
 fi
 
-if [ "$(ls -A -Ilost+found $DEST)" ]; then
+if [ "$(ls -A -Ilost+found "$DEST")" ]; then
 	echo "Destination $DEST is not empty. Aborting."
 	exit 1
 fi
@@ -99,10 +99,10 @@ cleanup() {
 trap cleanup EXIT
 
 ROOTFS="http://archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
-TAR_OPTIONS=""
+TAR_OPTIONS=()
 
-mkdir -p $BUILD
-TARBALL="$BUILD/$(basename $ROOTFS)"
+mkdir -p "$BUILD"
+TARBALL="$BUILD/$(basename "$ROOTFS")"
 
 mkdir -p "$BUILD"
 if [ ! -e "$TARBALL" ]; then
@@ -113,7 +113,7 @@ fi
 # Extract with BSD tar
 echo -n "Extracting ... "
 set -x
-bsdtar -xpf $TAR_OPTIONS "$TARBALL" -C "$DEST"
+bsdtar -xpf "${TAR_OPTIONS[@]}" "$TARBALL" -C "$DEST"
 echo "OK"
 
 # Add qemu emulation.
@@ -124,8 +124,6 @@ HOST_CACHE=$(pacconf CacheDir)
 GUEST_CACHE=$(pacconf --config="$DEST/etc/pacman.conf" CacheDir)
 
 do_chroot() {
-	local cmd="$@"
-
 	mount -o bind "$DEST" "$DEST"
 
 	mount -o bind /tmp "$DEST/tmp"
@@ -137,20 +135,20 @@ do_chroot() {
 		mount -o bind "$HOST_CACHE" "$DEST/$GUEST_CACHE"
 	fi
 
-	chroot "$DEST" $cmd
+	chroot "$DEST" "$@"
 	umount --recursive "$DEST"
 }
 
 mv "$DEST/etc/resolv.conf" "$DEST/etc/resolv.conf.dist"
 cp /etc/resolv.conf "$DEST/etc/resolv.conf"
 
-cat $OTHERDIR/pacman.conf > "$DEST/etc/pacman.conf"
+cat "$OTHERDIR/pacman.conf" > "$DEST/etc/pacman.conf"
 
 if [[ $FLAVOUR = barebone ]]; then
 	# Barebone doesn't need more than en_US.
 	echo "en_US.UTF-8 UTF-8" > "$DEST/etc/locale.gen-all"
 else
-	cp $OTHERDIR/locale.gen "$DEST/etc/locale.gen-all"
+	cp "$OTHERDIR/locale.gen" "$DEST/etc/locale.gen-all"
 fi
 
 mv "$DEST/etc/pacman.d/mirrorlist" "$DEST/etc/pacman.d/mirrorlist.default"
@@ -192,15 +190,15 @@ gzip -d UTF-8.gz
 locale-gen
 gzip UTF-8
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
-umount --quiet '$GUEST_CACHE'
+umount --quiet $(printf '%q' "$GUEST_CACHE")
 yes | pacman -Scc
 EOF
 chmod +x "$DEST/second-phase"
-cp $OTHERDIR/change-alarm $DEST/
+cp "$OTHERDIR/change-alarm" "$DEST/"
 do_chroot /second-phase
 do_chroot /change-alarm
-rm $DEST/second-phase
-rm $DEST/change-alarm
+rm "$DEST/second-phase"
+rm "$DEST/change-alarm"
 
 # Final touches
 rm "$DEST/usr/bin/qemu-aarch64-static"
@@ -213,10 +211,10 @@ touch "$DEST/etc/resolv.conf"
 rm "$DEST/etc/pacman.d/mirrorlist"
 mv "$DEST/etc/pacman.d/mirrorlist.default" "$DEST/etc/pacman.d/mirrorlist"
 
-cp $OTHERDIR/first_time_setup.sh $DEST/usr/local/sbin/
-cp $OTHERDIR/81-blueman.rules $DEST/etc/polkit-1/rules.d/
+cp "$OTHERDIR/first_time_setup.sh" "$DEST/usr/local/sbin/"
+cp "$OTHERDIR/81-blueman.rules" "$DEST/etc/polkit-1/rules.d/"
 
-cp -r $OTHERDIR/systemd/* $DEST/usr/lib/systemd/
+cp -r "$OTHERDIR"/systemd/* "$DEST/usr/lib/systemd/"
 
 install -Dm644 /dev/stdin "$DEST/etc/gtk-3.0/settings.ini" <<END
 [Settings]
@@ -226,29 +224,29 @@ END
 do_chroot /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
 
 # Replace Arch's with our own mkinitcpio
-rm $DEST/etc/mkinitcpio.conf
-cp $OTHERDIR/mkinitcpio.conf $DEST/etc/mkinitcpio.conf
-cp $OTHERDIR/mkinitcpio-hooks/resizerootfs-hooks $DEST/usr/lib/initcpio/hooks/resizerootfs
-cp $OTHERDIR/mkinitcpio-hooks/resizerootfs-install $DEST/usr/lib/initcpio/install/resizerootfs
+rm "$DEST/etc/mkinitcpio.conf"
+cp "$OTHERDIR/mkinitcpio.conf" "$DEST/etc/mkinitcpio.conf"
+cp "$OTHERDIR/mkinitcpio-hooks/resizerootfs-hooks" "$DEST/usr/lib/initcpio/hooks/resizerootfs"
+cp "$OTHERDIR/mkinitcpio-hooks/resizerootfs-install" "$DEST/usr/lib/initcpio/install/resizerootfs"
 
 if [[ $FLAVOUR = barebone ]]; then
 	# Barebone does not come with splash.
-	sed -i 's/bootsplash-danctnix//g' $DEST/etc/mkinitcpio.conf
+	sed -i 's/bootsplash-danctnix//g' "$DEST/etc/mkinitcpio.conf"
 fi
 
 do_chroot mkinitcpio -p linux-pine64
 
 # Shiny MOTD
-cp $OTHERDIR/motd $DEST/etc/motd
+cp "$OTHERDIR/motd" "$DEST/etc/motd"
 
 echo "Installed rootfs to $DEST"
 
 # Create tarball with BSD tar
 echo -n "Creating tarball ... "
 pushd .
-cd $DEST && bsdtar -czpf ../$OUT_TARBALL .
+cd "$DEST" && bsdtar -czpf "../$OUT_TARBALL" .
 popd
-rm -rf $DEST
+rm -rf "$DEST"
 
 set -x
 echo "Done"

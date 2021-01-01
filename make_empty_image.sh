@@ -16,9 +16,9 @@ if [ "$(id -u)" -ne "0" ]; then
 	exit 1
 fi
 
-fallocate -l $IMAGE_SIZE $IMAGE_NAME
+fallocate -l "$IMAGE_SIZE" "$IMAGE_NAME"
 
-cat << EOF | fdisk $IMAGE_NAME
+cat << EOF | fdisk "$IMAGE_NAME"
 o
 n
 p

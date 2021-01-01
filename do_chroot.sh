@@ -27,8 +27,8 @@ mount -o bind /dev "$DEST/dev"
 chroot "$DEST" mount -t proc proc /proc
 chroot "$DEST" mount -t sysfs sys /sys
 #chroot "$DEST" mv /etc/resolv.conf /etc/resolv.conf.dist
-cp /etc/resolv.conf $DEST/etc/resolv.conf
-chroot "$DEST" $@
+cp /etc/resolv.conf "$DEST/etc/resolv.conf"
+chroot "$DEST" "$@"
 #chroot "$DEST" mv /etc/resolv.conf.dist /etc/resolv.conf
 chroot "$DEST" umount /sys
 chroot "$DEST" umount /proc
