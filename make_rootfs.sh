@@ -14,7 +14,7 @@ BUILD_ARCH=arm64
 
 PACKAGES_BASE=(
 	dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager sudo
-	f2fs-tools zramswap
+	f2fs-tools btrfs-progs zramswap
 )
 PACKAGES_UI=(
 	mesa-git danctnix-phosh-ui-meta xdg-user-dirs noto-fonts-emoji gst-plugins-good
