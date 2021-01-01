@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Phosh doesn't accept letter passwords, yet.
-cat << EOF | passwd alarm
+passwd alarm << EOF
 123456
 123456
 
