@@ -170,8 +170,8 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 killall -KILL gpg-agent
 pacman -Rsn --noconfirm linux-aarch64
-pacman -Syu --noconfirm --overwrite=*
-pacman -S --noconfirm --overwrite=* --disable-download-timeout --needed ${PACKAGES[*]}
+pacman -Syu --noconfirm
+pacman -S --noconfirm --disable-download-timeout --needed ${PACKAGES[*]}
 
 systemctl disable systemd-networkd
 systemctl disable systemd-resolved
