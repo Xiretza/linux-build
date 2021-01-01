@@ -18,24 +18,8 @@ fi
 
 fallocate -l "$IMAGE_SIZE" "$IMAGE_NAME"
 
-cat << EOF | fdisk "$IMAGE_NAME"
-o
-n
-p
-1
-2048
-+128M
-t
-c
-n
-p
-2
-
-
-t
-2
-83
-a
-1
-w
+sfdisk "$IMAGE_NAME" <<EOF
+label: dos
+start=2048, size=+128M, type=c, bootable
+type=83
 EOF
