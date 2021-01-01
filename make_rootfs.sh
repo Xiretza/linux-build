@@ -91,14 +91,7 @@ fi
 
 TEMP=$(mktemp -d)
 cleanup() {
-	if [ -e "$DEST/proc/cmdline" ]; then
-		umount "$DEST/proc"
-	fi
-	if [ -d "$DEST/sys/kernel" ]; then
-		umount "$DEST/sys"
-	fi
-	umount "$DEST/dev" || true
-	umount "$DEST/tmp" || true
+	mountpoint --quiet "$DEST" && umount --recursive "$DEST"
 	if [ -d "$TEMP" ]; then
 		rm -rf "$TEMP"
 	fi
@@ -128,16 +121,17 @@ cp /usr/bin/qemu-aarch64-static "$DEST/usr/bin"
 cp /usr/bin/qemu-arm-static "$DEST/usr/bin"
 
 do_chroot() {
-	cmd="$@"
+	local cmd="$@"
+
+	mount -o bind "$DEST" "$DEST"
+
 	mount -o bind /tmp "$DEST/tmp"
 	mount -o bind /dev "$DEST/dev"
 	chroot "$DEST" mount -t proc proc /proc
 	chroot "$DEST" mount -t sysfs sys /sys
+
 	chroot "$DEST" $cmd
-	chroot "$DEST" umount /sys
-	chroot "$DEST" umount /proc
-	umount "$DEST/dev"
-	umount "$DEST/tmp"
+	umount --recursive "$DEST"
 }
 
 mv "$DEST/etc/resolv.conf" "$DEST/etc/resolv.conf.dist"
