@@ -120,6 +120,9 @@ echo "OK"
 cp /usr/bin/qemu-aarch64-static "$DEST/usr/bin"
 cp /usr/bin/qemu-arm-static "$DEST/usr/bin"
 
+HOST_CACHE=$(pacconf CacheDir)
+GUEST_CACHE=$(pacconf --config="$DEST/etc/pacman.conf" CacheDir)
+
 do_chroot() {
 	local cmd="$@"
 
@@ -129,6 +132,10 @@ do_chroot() {
 	mount -o bind /dev "$DEST/dev"
 	chroot "$DEST" mount -t proc proc /proc
 	chroot "$DEST" mount -t sysfs sys /sys
+
+	if [[ -d $HOST_CACHE ]]; then
+		mount -o bind "$HOST_CACHE" "$DEST/$GUEST_CACHE"
+	fi
 
 	chroot "$DEST" $cmd
 	umount --recursive "$DEST"
@@ -184,6 +191,7 @@ gzip -d UTF-8.gz
 locale-gen
 gzip UTF-8
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+umount --quiet '$GUEST_CACHE'
 yes | pacman -Scc
 EOF
 chmod +x "$DEST/second-phase"
