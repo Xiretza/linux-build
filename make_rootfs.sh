@@ -157,6 +157,8 @@ echo "Server = http://sg.mirror.archlinuxarm.org/\$arch/\$repo" > "$DEST/etc/pac
 
 echo "danctnix" > "$DEST/etc/hostname"
 
+systemd-machine-id-setup --root="$DEST"
+
 OIFS=$IFS IFS=$'\n'
 postinstall_cmds=${POST_INSTALL[*]}
 IFS=$OIFS
