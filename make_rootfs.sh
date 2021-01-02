@@ -196,11 +196,11 @@ umount --quiet $(printf '%q' "$GUEST_CACHE")
 yes | pacman -Scc
 EOF
 chmod +x "$DEST/second-phase"
-cp "$OTHERDIR/change-alarm" "$DEST/"
+cp "$OTHERDIR/add-secrets" "$DEST/"
 do_chroot /second-phase
-do_chroot /change-alarm
+do_chroot /add-secrets
 rm "$DEST/second-phase"
-rm "$DEST/change-alarm"
+rm "$DEST/add-secrets"
 
 # Final touches
 rm "$DEST/usr/bin/qemu-aarch64-static"
