@@ -1,7 +1,7 @@
 #!/bin/bash
 
 build() {
-    add_binary fdisk
+    add_binary sfdisk
     add_binary partx
     add_binary resize2fs
 

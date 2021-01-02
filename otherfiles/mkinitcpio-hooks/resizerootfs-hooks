@@ -8,9 +8,6 @@ run_hook() {
     DEVICE=$(echo "$root" | sed 's/..$//')
     echo "The current storage device is $DEVICE"
 
-    start=$(fdisk -l "${DEVICE}" | grep "${DEVICE}p2" | sed 's/*//' | awk '{print $2}')
-    echo "Rootfs start sector is $start"
-
     ROOTFS_FILESYSTYPE=$(fsck -N "$root")
 
     case "${ROOTFS_FILESYSTYPE}" in
@@ -18,17 +15,7 @@ run_hook() {
         *fsck.ext*) FSRESIZER="/usr/sbin/resize2fs -f";;
     esac
 
-    fdisk "${DEVICE}" <<EOF
-p
-d
-2
-n
-p
-2
-"$start"
-
-w
-EOF
+    echo "- + - -" | sfdisk -N 2 "${DEVICE}"
 
     partx -u "${DEVICE}"
     $FSRESIZER "${DEVICE}p2"
