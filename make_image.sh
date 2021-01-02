@@ -17,6 +17,11 @@ if [ "$(id -u)" -ne "0" ]; then
 	exit 1
 fi
 
+if [[ $(swapon --show | wc -l) -gt 1 ]]; then
+	echo "Error: found active swap space on host, this would end up in the image's fstab"
+	exit 1
+fi
+
 echo "Attaching loop device"
 LOOP_DEVICE=$(losetup -f)
 losetup -P "$LOOP_DEVICE" "$IMAGE_NAME"
