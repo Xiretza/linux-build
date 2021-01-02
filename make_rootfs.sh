@@ -89,9 +89,22 @@ if [ "$(ls -A -Ilost+found "$DEST")" ]; then
 	exit 1
 fi
 
+try_waiting() {
+	for _ in {1..3}; do
+		if "$@"; then
+			rc=$?
+			break
+		else
+			rc=$?
+			sleep 1
+		fi
+	done
+	return $rc
+}
+
 TEMP=$(mktemp -d)
 cleanup() {
-	mountpoint --quiet "$DEST" && umount --recursive "$DEST"
+	mountpoint --quiet "$DEST" && try_waiting umount --recursive "$DEST"
 	if [ -d "$TEMP" ]; then
 		rm -rf "$TEMP"
 	fi
@@ -135,7 +148,7 @@ do_chroot() {
 	fi
 
 	chroot "$DEST" "$@"
-	umount --recursive "$DEST"
+	try_waiting umount --recursive "$DEST"
 }
 
 mv "$DEST/etc/resolv.conf" "$DEST/etc/resolv.conf.dist"
