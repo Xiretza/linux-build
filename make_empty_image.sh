@@ -1,7 +1,6 @@
 #!/bin/sh
 
-set -x 
-set -e
+set -xue
 
 IMAGE_NAME="$1"
 IMAGE_SIZE="$2"

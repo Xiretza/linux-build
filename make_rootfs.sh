@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -xue
 
 export LC_ALL=C
 
@@ -112,7 +112,6 @@ fi
 
 # Extract with BSD tar
 echo -n "Extracting ... "
-set -x
 bsdtar -xpf "${TAR_OPTIONS[@]}" "$TARBALL" -C "$DEST"
 echo "OK"
 
@@ -250,5 +249,4 @@ cd "$DEST" && bsdtar -czpf "../$OUT_TARBALL" .
 popd
 rm -rf "$DEST"
 
-set -x
 echo "Done"

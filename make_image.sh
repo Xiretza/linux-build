@@ -1,7 +1,6 @@
 #!/bin/bash
 
-set -x 
-set -e
+set -xue
 
 IMAGE_NAME="$1"
 TARBALL="$2"
