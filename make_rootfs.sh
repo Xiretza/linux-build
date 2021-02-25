@@ -272,9 +272,6 @@ fi
 
 do_chroot mkinitcpio -p linux-pine64
 
-# Shiny MOTD
-cp "$OTHERDIR/motd" "$DEST/etc/motd"
-
 echo "Installed rootfs to $DEST"
 
 # Create tarball with BSD tar
