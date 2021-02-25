@@ -198,7 +198,7 @@ locale-gen
 gzip UTF-8
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 umount --quiet $(printf '%q' "$GUEST_CACHE")
-yes | pacman -Scc
+pacman -Scc --noconfirm
 EOF
 chmod +x "$DEST/second-phase"
 cp "$OTHERDIR/add-secrets" "$DEST/"
