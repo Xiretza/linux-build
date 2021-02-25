@@ -117,11 +117,7 @@ TAR_OPTIONS=()
 mkdir -p "$BUILD"
 TARBALL="$BUILD/$(basename "$ROOTFS")"
 
-mkdir -p "$BUILD"
-if [ ! -e "$TARBALL" ]; then
-	echo "Downloading $DISTRO rootfs tarball ..."
-	wget -O "$TARBALL" "$ROOTFS"
-fi
+wget --output-document="$TARBALL" "$ROOTFS"
 
 # Extract with BSD tar
 echo -n "Extracting ... "
