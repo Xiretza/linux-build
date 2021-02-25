@@ -103,6 +103,8 @@ if [ "$(ls -A -Ilost+found "$DEST")" ]; then
 	exit 1
 fi
 
+source secrets
+
 try_waiting() {
 	for _ in {1..3}; do
 		if "$@"; then
@@ -200,7 +202,6 @@ systemctl disable systemd-resolved
 
 systemctl enable zramswap
 systemctl enable NetworkManager
-usermod -a -G network,video,audio,optical,storage,input,scanner,games,lp,rfkill,wheel alarm
 
 $postinstall_cmds
 
@@ -216,13 +217,25 @@ gzip UTF-8
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 umount --quiet $(printf '%q' "$GUEST_CACHE")
 pacman -Scc --noconfirm
+
+userdel --remove alarm
+groupadd --gid 1000 lambda
+useradd \
+	--create-home \
+	--groups=network,video,audio,optical,storage,input,scanner,games,lp,rfkill,wheel \
+	--uid=1000 \
+	--gid=1000 \
+	lambda
+chsh --shell=/usr/bin/fish lambda
+
+echo "lambda:$PASSWORD" | chpasswd
 EOF
 chmod +x "$DEST/second-phase"
-cp "$OTHERDIR/add-secrets" "$DEST/"
 do_chroot /second-phase
-do_chroot /add-secrets
 rm "$DEST/second-phase"
-rm "$DEST/add-secrets"
+
+install --owner=1000 --group=1000 -dm700 "$DEST/home/lambda/.ssh"
+install --owner=1000 --group=1000 -m600 -t "$DEST/home/lambda/.ssh" "$OTHERDIR/authorized_keys"
 
 # Final touches
 rm "$DEST/usr/bin/qemu-aarch64-static"
