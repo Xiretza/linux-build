@@ -10,7 +10,6 @@ DEST="$1"
 OUT_TARBALL="$2"
 DEVICE=$3
 FLAVOUR=$4
-BUILD_ARCH=arm64
 
 PACKAGES_BASE=(
 	dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager sudo
@@ -112,8 +111,6 @@ cleanup() {
 trap cleanup EXIT
 
 ROOTFS="http://archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
-TAR_OPTIONS=()
-
 mkdir -p "$BUILD"
 TARBALL="$BUILD/$(basename "$ROOTFS")"
 
@@ -121,7 +118,7 @@ wget --output-document="$TARBALL" "$ROOTFS"
 
 # Extract with BSD tar
 echo -n "Extracting ... "
-bsdtar -xpf "${TAR_OPTIONS[@]}" "$TARBALL" -C "$DEST"
+bsdtar -xpf "$TARBALL" -C "$DEST"
 echo "OK"
 
 # Add qemu emulation.
