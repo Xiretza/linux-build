@@ -22,8 +22,8 @@ if [[ $(swapon --show | wc -l) -gt 1 ]]; then
 fi
 
 echo "Attaching loop device"
-LOOP_DEVICE=$(losetup -f)
-losetup -P "$LOOP_DEVICE" "$IMAGE_NAME"
+LOOP_DEVICE=$(losetup --find)
+losetup --partscan "$LOOP_DEVICE" "$IMAGE_NAME"
 
 echo "Creating filesystems"
 mkfs.vfat "${LOOP_DEVICE}p1"

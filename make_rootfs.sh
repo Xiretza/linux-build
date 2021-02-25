@@ -78,7 +78,7 @@ if [ "$EUID" -ne "0" ]; then
 	exit 1
 fi
 
-DEST=$(readlink -f "$DEST")
+DEST=$(readlink --canonicalize "$DEST")
 
 if [ ! -d "$DEST" ]; then
 	mkdir -p "$DEST"
@@ -102,7 +102,7 @@ try_waiting() {
 	return $rc
 }
 
-TEMP=$(mktemp -d)
+TEMP=$(mktemp --directory)
 cleanup() {
 	mountpoint --quiet "$DEST" && try_waiting umount --recursive "$DEST"
 	if [ -d "$TEMP" ]; then
@@ -257,9 +257,7 @@ echo "Installed rootfs to $DEST"
 
 # Create tarball with BSD tar
 echo -n "Creating tarball ... "
-pushd .
-cd "$DEST" && bsdtar -czpf "../$OUT_TARBALL" .
-popd
+bsdtar --cd "$DEST" --preserve-permissions --create --gzip --file "../$OUT_TARBALL" .
 rm -rf "$DEST"
 
 echo "Done"

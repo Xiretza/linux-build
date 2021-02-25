@@ -15,7 +15,7 @@ if [ "$EUID" -ne "0" ]; then
 	exit 1
 fi
 
-fallocate -l "$IMAGE_SIZE" "$IMAGE_NAME"
+fallocate --length="$IMAGE_SIZE" "$IMAGE_NAME"
 
 sfdisk "$IMAGE_NAME" <<EOF
 label: dos
