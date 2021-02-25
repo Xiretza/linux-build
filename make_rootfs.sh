@@ -175,7 +175,7 @@ mv "$DEST/etc/pacman.d/mirrorlist" "$DEST/etc/pacman.d/mirrorlist.default"
 
 echo "Server = http://sg.mirror.archlinuxarm.org/\$arch/\$repo" > "$DEST/etc/pacman.d/mirrorlist"
 
-echo "danctnix" > "$DEST/etc/hostname"
+echo "pinus" > "$DEST/etc/hostname"
 
 systemd-machine-id-setup --root="$DEST"
 
