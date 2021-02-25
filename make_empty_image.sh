@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -xue
 
@@ -10,7 +10,7 @@ if [ -z "$IMAGE_NAME" ] || [ -z "$IMAGE_SIZE" ]; then
 	exit 1
 fi
 
-if [ "$(id -u)" -ne "0" ]; then
+if [ "$EUID" -ne "0" ]; then
 	echo "This script requires root (not really - but make_image.sh will fail later without root)"
 	exit 1
 fi

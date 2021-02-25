@@ -11,7 +11,7 @@ if [ -z "$IMAGE_NAME" ] || [ -z "$TARBALL" ] || [ -z "$BOOTLOADER" ]; then
 	exit 1
 fi
 
-if [ "$(id -u)" -ne "0" ]; then
+if [ "$EUID" -ne 0 ]; then
 	echo "This script requires root."
 	exit 1
 fi
