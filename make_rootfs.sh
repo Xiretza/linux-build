@@ -231,7 +231,6 @@ END
 do_chroot /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
 
 # Replace Arch's with our own mkinitcpio
-rm "$DEST/etc/mkinitcpio.conf"
 cp "$OTHERDIR/mkinitcpio.conf" "$DEST/etc/mkinitcpio.conf"
 cp "$OTHERDIR/mkinitcpio-hooks/resizerootfs-hooks" "$DEST/usr/lib/initcpio/hooks/resizerootfs"
 cp "$OTHERDIR/mkinitcpio-hooks/resizerootfs-install" "$DEST/usr/lib/initcpio/install/resizerootfs"
