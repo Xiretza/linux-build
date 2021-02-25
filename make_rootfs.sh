@@ -178,6 +178,8 @@ pacman -Rsn --noconfirm linux-aarch64
 pacman -Syu --noconfirm
 pacman -S --noconfirm --disable-download-timeout --needed ${PACKAGES[*]}
 
+pacman -Fy
+
 systemctl disable systemd-networkd
 systemctl disable systemd-resolved
 
