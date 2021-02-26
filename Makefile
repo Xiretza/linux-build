@@ -1,35 +1,18 @@
 export RELEASE_NAME ?= $(shell date +%Y%m%d)
 
-rootfs-pinetab-barebone-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinetab-barebone-$(RELEASE_NAME) $@ pinetab barebone
+# preset(device, flavour, memory, bootloader)
+define preset
+rootfs-$1-$2-$(RELEASE_NAME).tar.gz:
+	./make_rootfs.sh $$(subst .tar.gz,,$$@) $$@ $1 $2
 
-rootfs-pinephone-barebone-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinephone-barebone-$(RELEASE_NAME) $@ pinephone barebone
+archlinux-$1-$2-$(RELEASE_NAME).img: rootfs-$1-$2-$(RELEASE_NAME).tar.gz
+	./make_empty_image.sh $$@ $3
+	./make_image.sh $$@ $$< $4
 
-rootfs-pinetab-phosh-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinetab-phosh-$(RELEASE_NAME) $@ pinetab phosh
+.PHONY: archlinux-$1-$2
+archlinux-$1-$2: archlinux-$1-$2-$(RELEASE_NAME).img
+endef
 
-rootfs-pinephone-phosh-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinephone-phosh-$(RELEASE_NAME) $@ pinephone phosh
-
-archlinux-pinetab-barebone-$(RELEASE_NAME).img: rootfs-pinetab-barebone-$(RELEASE_NAME).tar.gz
-	./make_empty_image.sh $@ 2048M
-	./make_image.sh $@ $< u-boot-sunxi-with-spl-pinetab-552.bin
-
-archlinux-pinephone-barebone-$(RELEASE_NAME).img: rootfs-pinephone-barebone-$(RELEASE_NAME).tar.gz
-	./make_empty_image.sh $@ 2048M
-	./make_image.sh $@ $< u-boot-sunxi-with-spl-pinephone-552.bin
-
-archlinux-pinetab-phosh-$(RELEASE_NAME).img: rootfs-pinetab-phosh-$(RELEASE_NAME).tar.gz
-	./make_empty_image.sh $@ 4096M
-	./make_image.sh $@ $< u-boot-sunxi-with-spl-pinetab-552.bin
-
-archlinux-pinephone-phosh-$(RELEASE_NAME).img: rootfs-pinephone-phosh-$(RELEASE_NAME).tar.gz
-	./make_empty_image.sh $@ 4096M
-	./make_image.sh $@ $< u-boot-sunxi-with-spl-pinephone-552.bin
-
-.PHONY: archlinux-pinetab-barebone archlinux-pinephone-barebone archlinux-pinetab-phosh archlinux-pinephone-phosh
-archlinux-pinetab-barebone: archlinux-pinetab-barebone-$(RELEASE_NAME).img
-archlinux-pinephone-barebone: archlinux-pinephone-barebone-$(RELEASE_NAME).img
-archlinux-pinetab-phosh: archlinux-pinetab-phosh-$(RELEASE_NAME).img
-archlinux-pinephone-phosh: archlinux-pinephone-phosh-$(RELEASE_NAME).img
+DEVICES := pinetab pinephone
+$(foreach device,$(DEVICES),$(eval $(call preset,$(device),barebone,2048M,u-boot-sunxi-with-spl-$(device)-552.bin)))
+$(foreach device,$(DEVICES),$(eval $(call preset,$(device),phosh,4096M,u-boot-sunxi-with-spl-$(device)-552.bin)))
