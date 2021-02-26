@@ -7,54 +7,72 @@ OTHERDIR="otherfiles"
 DEST="$1"
 OUT_TARBALL="$2"
 ROOTFS_PRESET="$3"
+DEVICE=${ROOTFS_PRESET%%-*}
+FLAVOUR=${ROOTFS_PRESET#*-}
 BUILD_ARCH=arm64
 
-# All the presets
-if [ "$ROOTFS_PRESET" = "pinephone-phosh" ]; then
-	PACKAGES_BASE="dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager device-pine64-pinephone bootsplash-theme-danctnix v4l-utils sudo f2fs-tools zramswap"
-	PACKAGES_UI="mesa-git danctnix-phosh-ui-meta xdg-user-dirs noto-fonts-emoji gst-plugins-good lollypop gedit evince-mobile mobile-config-firefox gnome-calculator gnome-clocks gnome-maps megapixels gnome-usage-mobile gtherm geary-mobile purple-matrix purple-telegram portfolio-fm calls chatty kgx gnome-software-mobile gnome-contacts-mobile gnome-initial-setup-mobile"
-	POST_INSTALL="
-		systemctl enable bluetooth
-		systemctl enable eg25_power
-		systemctl enable eg25_audio_routing
-		systemctl enable ModemManager
-		systemctl enable phosh
-	"
+PACKAGES_BASE=(
+	dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager sudo
+	f2fs-tools zramswap
+)
+PACKAGES_UI=(
+	mesa-git danctnix-phosh-ui-meta xdg-user-dirs noto-fonts-emoji gst-plugins-good
+	lollypop gedit evince-mobile mobile-config-firefox gnome-calculator gnome-clocks
+	gnome-maps megapixels gnome-usage-mobile gtherm geary-mobile purple-matrix
+	purple-telegram portfolio-fm chatty kgx gnome-software-mobile gnome-contacts-mobile
+	gnome-initial-setup-mobile
+)
+POST_INSTALL=()
 
-elif [ "$ROOTFS_PRESET" = "pinetab-phosh" ]; then
-	PACKAGES_BASE="dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager device-pine64-pinetab bootsplash-theme-danctnix v4l-utils sudo f2fs-tools zramswap"
-	PACKAGES_UI="mesa-git danctnix-phosh-ui-meta xdg-user-dirs noto-fonts-emoji gst-plugins-good lollypop gedit evince-mobile mobile-config-firefox gnome-calculator gnome-clocks gnome-maps megapixels gnome-usage-mobile gtherm geary-mobile purple-matrix purple-telegram portfolio-fm chatty kgx gnome-software-mobile gnome-contacts-mobile gnome-initial-setup-mobile"
-	POST_INSTALL="
-		systemctl enable bluetooth
-		systemctl enable phosh
-	"
-
-elif [ "$ROOTFS_PRESET" = "pinephone-barebone" ]; then
-	PACKAGES_BASE="dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager device-pine64-pinephone danctnix-usb-tethering dhcp sudo f2fs-tools zramswap"
-	POST_INSTALL="
-		systemctl enable usb-tethering
-		systemctl enable dhcpd4
-		systemctl enable sshd
-		systemctl enable eg25_power
-		systemctl enable eg25_audio_routing
-	"
-
-elif [ "$ROOTFS_PRESET" = "pinetab-barebone" ]; then
-	PACKAGES_BASE="dosfstools curl xz iw rfkill netctl dialog wpa_supplicant pv networkmanager device-pine64-pinetab danctnix-usb-tethering dhcp sudo f2fs-tools zramswap"
-	POST_INSTALL="
-		systemctl enable usb-tethering
-		systemctl enable dhcpd4
-		systemctl enable sshd
-	"
-
-fi
-
-export LC_ALL=C
-
-if [ -z "$DEST" ] || [ -z "$OUT_TARBALL"  ] || [ -z "$ROOTFS_PRESET"  ]; then
+if [ -z "$DEST" ] || [ -z "$OUT_TARBALL" ] || [ -z "$ROOTFS_PRESET" ]; then
 	echo "Usage: $0 <destination-folder> <destination-tarball> <rootfs-preset>"
 	exit 1
 fi
+
+case "$DEVICE" in
+	pinephone)
+		PACKAGES_BASE+=(device-pine64-pinephone)
+		PACKAGES_UI+=(calls)
+		POST_INSTALL+=(
+			"systemctl enable eg25_power"
+			"systemctl enable eg25_audio_routing"
+		)
+		;;
+	pinetab)
+		PACKAGES_BASE+=(device-pine64-pinetab)
+		;;
+	*)
+		echo "Unknown device: $DEVICE"
+		exit 1
+esac
+
+case "$FLAVOUR" in
+	phosh)
+		PACKAGES_BASE+=(bootsplash-theme-danctnix v4l-utils)
+		PACKAGES=("${PACKAGES_BASE[@]}" "${PACKAGES_UI[@]}")
+		POST_INSTALL+=(
+			"systemctl enable bluetooth"
+			"systemctl enable phosh"
+		)
+		if [[ $DEVICE = pinephone ]]; then
+			POST_INSTALL+=("systemctl enable ModemManager")
+		fi;
+		;;
+	barebone)
+		PACKAGES_BASE+=(danctnix-usb-tethering dhcp)
+		PACKAGES=("${PACKAGES_BASE[@]}")
+		POST_INSTALL+=(
+			"systemctl enable usb-tethering"
+			"systemctl enable dhcpd4"
+			"systemctl enable sshd"
+		)
+		;;
+	*)
+		echo "Unknown build flavour: $FLAVOUR"
+		exit 1
+esac
+
+export LC_ALL=C
 
 if [ "$(id -u)" -ne "0" ]; then
 	echo "This script requires root."
@@ -128,7 +146,7 @@ cp /etc/resolv.conf "$DEST/etc/resolv.conf"
 
 cat $OTHERDIR/pacman.conf > "$DEST/etc/pacman.conf"
 
-if [[ "$ROOTFS_PRESET" = *"barebone"* ]]; then
+if [[ $FLAVOUR = barebone ]]; then
 	# Barebone doesn't need more than en_US.
 	echo "en_US.UTF-8 UTF-8" > "$DEST/etc/locale.gen-all"
 else
@@ -141,6 +159,10 @@ echo "Server = http://sg.mirror.archlinuxarm.org/\$arch/\$repo" > "$DEST/etc/pac
 
 echo "danctnix" > "$DEST/etc/hostname"
 
+OIFS=$IFS IFS=$'\n'
+postinstall_cmds=${POST_INSTALL[*]}
+IFS=$OIFS
+
 cat > "$DEST/second-phase" <<EOF
 #!/bin/sh
 pacman-key --init
@@ -148,7 +170,7 @@ pacman-key --populate archlinuxarm
 killall -KILL gpg-agent
 pacman -Rsn --noconfirm linux-aarch64
 pacman -Syu --noconfirm --overwrite=*
-pacman -S --noconfirm --overwrite=* --disable-download-timeout --needed $PACKAGES_BASE $PACKAGES_UI
+pacman -S --noconfirm --overwrite=* --disable-download-timeout --needed ${PACKAGES[*]}
 
 systemctl disable sshd
 
@@ -159,7 +181,7 @@ systemctl enable zramswap
 systemctl enable NetworkManager
 usermod -a -G network,video,audio,optical,storage,input,scanner,games,lp,rfkill,wheel alarm
 
-$POST_INSTALL
+$postinstall_cmds
 
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 
@@ -209,7 +231,7 @@ cp $OTHERDIR/mkinitcpio.conf $DEST/etc/mkinitcpio.conf
 cp $OTHERDIR/mkinitcpio-hooks/resizerootfs-hooks $DEST/usr/lib/initcpio/hooks/resizerootfs
 cp $OTHERDIR/mkinitcpio-hooks/resizerootfs-install $DEST/usr/lib/initcpio/install/resizerootfs
 
-if [[ "$ROOTFS_PRESET" = *"barebone"* ]]; then
+if [[ $FLAVOUR = barebone ]]; then
 	# Barebone does not come with splash.
 	sed -i 's/bootsplash-danctnix//g' $DEST/etc/mkinitcpio.conf
 fi
