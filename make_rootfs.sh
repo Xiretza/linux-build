@@ -67,6 +67,21 @@ case "$FLAVOUR" in
 			"systemctl enable dhcpd4"
 		)
 		;;
+	lambda)
+		PACKAGES_BASE+=(
+			v4l-utils danctnix-usb-tethering dhcp termite-terminfo fish vim man-db man-pages
+		)
+		PACKAGES=("${PACKAGES_BASE[@]}" "${PACKAGES_UI[@]}")
+		POST_INSTALL+=(
+			"systemctl enable usb-tethering"
+			"systemctl enable dhcpd4"
+			"systemctl enable bluetooth"
+			"systemctl enable phosh"
+		)
+		if [[ $DEVICE = pinephone ]]; then
+			POST_INSTALL+=("systemctl enable ModemManager")
+		fi;
+		;;
 	*)
 		echo "Unknown build flavour: $FLAVOUR"
 		exit 1
