@@ -270,7 +270,10 @@ if [[ ${PACKAGES[*]} != *bootsplash-theme-danctnix* ]]; then
 	sed -i 's/bootsplash-danctnix//g' "$DEST/etc/mkinitcpio.conf"
 fi
 
+sed -i -E '/^setenv bootargs/ s/quiet ?//g' "$DEST/boot/boot.txt"
+
 do_chroot mkinitcpio -p linux-pine64
+do_chroot bash -c 'cd /boot; ./mkscr'
 
 echo "Installed rootfs to $DEST"
 
