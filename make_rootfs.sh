@@ -2,6 +2,8 @@
 
 set -e
 
+export LC_ALL=C
+
 BUILD="build"
 OTHERDIR="otherfiles"
 DEST="$1"
@@ -70,8 +72,6 @@ case "$FLAVOUR" in
 		echo "Unknown build flavour: $FLAVOUR"
 		exit 1
 esac
-
-export LC_ALL=C
 
 if [ "$(id -u)" -ne "0" ]; then
 	echo "This script requires root."
