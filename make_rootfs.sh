@@ -186,7 +186,7 @@ postinstall_cmds=${POST_INSTALL[*]}
 IFS=$OIFS
 
 cat > "$DEST/second-phase" <<EOF
-#!/bin/sh
+#!/bin/bash
 set -xue
 pacman-key --init
 pacman-key --populate archlinuxarm
