@@ -263,8 +263,7 @@ do_chroot /usr/bin/glib-compile-schemas /usr/share/glib-2.0/schemas
 # Replace Arch's with our own mkinitcpio
 cp "$OTHERDIR/mkinitcpio.conf" "$DEST/etc/mkinitcpio.conf"
 
-if [[ $FLAVOUR = barebone ]]; then
-	# Barebone does not come with splash.
+if [[ ${PACKAGES[*]} != *bootsplash-theme-danctnix* ]]; then
 	sed -i 's/bootsplash-danctnix//g' "$DEST/etc/mkinitcpio.conf"
 fi
 
