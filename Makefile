@@ -1,4 +1,11 @@
-export RELEASE_NAME ?= $(shell date +%F)
+EXTRANAME ?=
+DATE := $(shell date +%F)
+
+ifeq (EXTRANAME,)
+RELEASE_NAME ?= $(DATE)
+else
+RELEASE_NAME ?= $(DATE)-$(EXTRANAME)
+endif
 
 # preset(device, flavour, memory, bootloader)
 define preset
