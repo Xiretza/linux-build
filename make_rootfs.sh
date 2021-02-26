@@ -52,6 +52,7 @@ case "$FLAVOUR" in
 		POST_INSTALL+=(
 			"systemctl enable bluetooth"
 			"systemctl enable phosh"
+			"systemctl disable sshd"
 		)
 		if [[ $DEVICE = pinephone ]]; then
 			POST_INSTALL+=("systemctl enable ModemManager")
@@ -63,7 +64,6 @@ case "$FLAVOUR" in
 		POST_INSTALL+=(
 			"systemctl enable usb-tethering"
 			"systemctl enable dhcpd4"
-			"systemctl enable sshd"
 		)
 		;;
 	*)
@@ -170,8 +170,6 @@ killall -KILL gpg-agent
 pacman -Rsn --noconfirm linux-aarch64
 pacman -Syu --noconfirm --overwrite=*
 pacman -S --noconfirm --overwrite=* --disable-download-timeout --needed ${PACKAGES[*]}
-
-systemctl disable sshd
 
 systemctl disable systemd-networkd
 systemctl disable systemd-resolved
