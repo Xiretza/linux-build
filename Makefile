@@ -1,16 +1,16 @@
 export RELEASE_NAME ?= $(shell date +%Y%m%d)
 
 rootfs-pinetab-barebone-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinetab-barebone-$(RELEASE_NAME) $@ pinetab-barebone
+	./make_rootfs.sh rootfs-pinetab-barebone-$(RELEASE_NAME) $@ pinetab barebone
 
 rootfs-pinephone-barebone-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinephone-barebone-$(RELEASE_NAME) $@ pinephone-barebone
+	./make_rootfs.sh rootfs-pinephone-barebone-$(RELEASE_NAME) $@ pinephone barebone
 
 rootfs-pinetab-phosh-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinetab-phosh-$(RELEASE_NAME) $@ pinetab-phosh
+	./make_rootfs.sh rootfs-pinetab-phosh-$(RELEASE_NAME) $@ pinetab phosh
 
 rootfs-pinephone-phosh-$(RELEASE_NAME).tar.gz:
-	./make_rootfs.sh rootfs-pinephone-phosh-$(RELEASE_NAME) $@ pinephone-phosh
+	./make_rootfs.sh rootfs-pinephone-phosh-$(RELEASE_NAME) $@ pinephone phosh
 
 archlinux-pinetab-barebone-$(RELEASE_NAME).img: rootfs-pinetab-barebone-$(RELEASE_NAME).tar.gz
 	./make_empty_image.sh $@ 2048M

@@ -6,9 +6,8 @@ BUILD="build"
 OTHERDIR="otherfiles"
 DEST="$1"
 OUT_TARBALL="$2"
-ROOTFS_PRESET="$3"
-DEVICE=${ROOTFS_PRESET%%-*}
-FLAVOUR=${ROOTFS_PRESET#*-}
+DEVICE=$3
+FLAVOUR=$4
 BUILD_ARCH=arm64
 
 PACKAGES_BASE=(
@@ -24,8 +23,8 @@ PACKAGES_UI=(
 )
 POST_INSTALL=()
 
-if [ -z "$DEST" ] || [ -z "$OUT_TARBALL" ] || [ -z "$ROOTFS_PRESET" ]; then
-	echo "Usage: $0 <destination-folder> <destination-tarball> <rootfs-preset>"
+if [ -z "$DEST" ] || [ -z "$OUT_TARBALL" ] || [ -z "$DEVICE" ] || [ -z "$FLAVOUR" ]; then
+	echo "Usage: $0 <destination-folder> <destination-tarball> <device> <build flavour>"
 	exit 1
 fi
 
