@@ -4,7 +4,6 @@ set -xue
 
 export LC_ALL=C
 
-BUILD="build"
 OTHERDIR="otherfiles"
 DEST="$1"
 OUT_TARBALL="$2"
@@ -26,6 +25,11 @@ POST_INSTALL=()
 
 if [ -z "$DEST" ] || [ -z "$OUT_TARBALL" ] || [ -z "$DEVICE" ] || [ -z "$FLAVOUR" ]; then
 	echo "Usage: $0 <destination-folder> <destination-tarball> <device> <build flavour>"
+	exit 1
+fi
+
+if [ -z "$BUIDDIR" ]; then
+	echo "BUILDDIR environment variable must be set"
 	exit 1
 fi
 
@@ -128,8 +132,8 @@ cleanup() {
 trap cleanup EXIT
 
 ROOTFS="http://archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz"
-mkdir -p "$BUILD"
-TARBALL="$BUILD/$(basename "$ROOTFS")"
+mkdir -p "$BUILDDIR"
+TARBALL="$BUILDDIR/$(basename "$ROOTFS")"
 
 wget --output-document="$TARBALL" "$ROOTFS"
 

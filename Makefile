@@ -1,3 +1,5 @@
+BUILDDIR = build
+
 EXTRANAME ?=
 DATE := $(shell date +%F)
 
@@ -9,18 +11,21 @@ endif
 
 # preset(device, flavour, memory, bootloader)
 define preset
-rootfs-$1-$2-$(RELEASE_NAME).tar.gz:
+$(BUILDDIR)/rootfs-$1-$2-$(RELEASE_NAME).tar.gz: | $(BUILDDIR)
 	./make_rootfs.sh $$(subst .tar.gz,,$$@) $$@ $1 $2
 
-archlinux-$1-$2-$(RELEASE_NAME).img: rootfs-$1-$2-$(RELEASE_NAME).tar.gz
+$(BUILDDIR)/archlinux-$1-$2-$(RELEASE_NAME).img: $(BUILDDIR)/rootfs-$1-$2-$(RELEASE_NAME).tar.gz | $(BUILDDIR)
 	./make_empty_image.sh $$@ $3
 	./make_image.sh $$@ $$< $4
 
 .PHONY: archlinux-$1-$2
-archlinux-$1-$2: archlinux-$1-$2-$(RELEASE_NAME).img
+archlinux-$1-$2: $(BUILDDIR)/archlinux-$1-$2-$(RELEASE_NAME).img
 endef
 
 default: archlinux-pinephone-lambda
+
+$(BUILDDIR):
+	mkdir $@
 
 DEVICES := pinetab pinephone
 $(foreach device,$(DEVICES),$(eval $(call preset,$(device),barebone,2048M,u-boot-sunxi-with-spl-$(device)-552.bin)))
