@@ -227,6 +227,7 @@ useradd \
 	--gid=1000 \
 	lambda
 chsh --shell=/usr/bin/fish lambda
+btrfs subvolume create /home/lambda/.cache
 
 echo "lambda:$PASSWORD" | chpasswd
 EOF

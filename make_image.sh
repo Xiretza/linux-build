@@ -27,12 +27,30 @@ losetup --partscan "$LOOP_DEVICE" "$IMAGE_NAME"
 
 echo "Creating filesystems"
 mkfs.vfat "${LOOP_DEVICE}p1"
-mkfs.f2fs "${LOOP_DEVICE}p2"
+mkfs.btrfs "${LOOP_DEVICE}p2"
 
 TEMP_ROOT=$(mktemp -d)
 mkdir -p "$TEMP_ROOT"
+
+echo "Creating subvolumes"
+mount -o subvol=/ "${LOOP_DEVICE}p2" "$TEMP_ROOT"
+btrfs subvolume create "$TEMP_ROOT/@root"
+mkdir -p "$TEMP_ROOT/@root/var"
+btrfs subvolume create "$TEMP_ROOT/@root/var/cache"
+btrfs subvolume create "$TEMP_ROOT/@home"
+mkdir -p "$TEMP_ROOT/@home/lambda"
+btrfs subvolume create "$TEMP_ROOT/@home/lambda/.cache"
+chown 1000:1000 "$TEMP_ROOT/@home/lambda/.cache"
+btrfs subvolume create "$TEMP_ROOT/_btrbk_snap"
+btrfs subvolume set-default "$TEMP_ROOT/@root"
+umount "$TEMP_ROOT"
+
 echo "Mounting rootfs"
 mount "${LOOP_DEVICE}p2" "$TEMP_ROOT"
+mkdir -p "$TEMP_ROOT/btrfs_roots/rootfs"
+mount -o subvol=/ "${LOOP_DEVICE}p2" "$TEMP_ROOT/btrfs_roots/rootfs"
+mkdir -p "$TEMP_ROOT/home"
+mount -o subvol=@home "${LOOP_DEVICE}p2" "$TEMP_ROOT/home"
 mkdir -p "${TEMP_ROOT}/boot"
 mount -o iocharset=iso8859-1 "${LOOP_DEVICE}p1" "${TEMP_ROOT}/boot"
 
