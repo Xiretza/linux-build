@@ -238,6 +238,8 @@ rm "$DEST/second-phase"
 install --owner=1000 --group=1000 -dm700 "$DEST/home/lambda/.ssh"
 install --owner=1000 --group=1000 -m600 -t "$DEST/home/lambda/.ssh" "$OTHERDIR/authorized_keys"
 
+install -m600 -t "$DEST/etc/NetworkManager/system-connections/" "$OTHERDIR"/*.nmconnection
+
 # Final touches
 rm "$DEST/usr/bin/qemu-aarch64-static"
 rm "$DEST/usr/bin/qemu-arm-static"
