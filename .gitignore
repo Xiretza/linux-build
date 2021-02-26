@@ -1,0 +1,5 @@
+/rootfs-*/
+/build/
+/*.img
+/rootfs*.tar.gz
+/secrets
